@@ -1,0 +1,16 @@
+{
+  "$schema": "./package-schema.json",
+  "dependencies": {
+    "firebase": "^11.2.0"
+  },
+  "name": "ai-doctor-simple-search",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "Doctor Recommendation System"
+}

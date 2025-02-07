@@ -1,0 +1,86 @@
+{
+  "doctors": {
+    "doctor1": {
+      "availability": "10:00 AM - 5:00 PM",
+      "chamber": "Chamber 1",
+      "fees": 500,
+      "name": "Dr. Alice Smith",
+      "specialization": "Neurologist"
+    },
+    "doctor2": {
+      "availability": "9:00 AM - 2:00 PM",
+      "chamber": "Chamber 2",
+      "fees": 300,
+      "name": "Dr. Bob Johnson",
+      "specialization": "General Physician"
+    },
+    "doctor3": {
+      "availability": "11:00 AM - 6:00 PM",
+      "chamber": "Chamber 3",
+      "fees": 400,
+      "name": "Dr. Clara Adams",
+      "specialization": "Dermatologist"
+    },
+    "doctor4": {
+      "availability": "8:00 AM - 1:00 PM",
+      "chamber": "Chamber 4",
+      "fees": 600,
+      "name": "Dr. Daniel Brown",
+      "specialization": "Cardiologist"
+    },
+    "doctor5": {
+      "availability": "10:00 AM - 4:00 PM",
+      "chamber": "Chamber 5",
+      "fees": 450,
+      "name": "Dr. Eva Green",
+      "specialization": "Gastroenterologist"
+    },
+    "doctor6": {
+      "availability": "12:00 PM - 7:00 PM",
+      "chamber": "Chamber 6",
+      "fees": 500,
+      "name": "Dr. Frank White",
+      "specialization": "Psychiatrist"
+    },
+    "doctor7": {
+      "availability": "9:30 AM - 3:30 PM",
+      "chamber": "Chamber 7",
+      "fees": 350,
+      "name": "Dr. Grace Taylor",
+      "specialization": "Pediatrician"
+    },
+    "doctor8": {
+      "availability": "10:30 AM - 5:30 PM",
+      "chamber": "Chamber 8",
+      "fees": 400,
+      "name": "Dr. Henry Lee",
+      "specialization": "Orthopedist"
+    },
+    "doctor9": {
+      "availability": "9:00 AM - 1:00 PM",
+      "chamber": "Chamber 9",
+      "fees": 700,
+      "name": "Dr. Irene Walker",
+      "specialization": "Oncologist"
+    },
+    "doctor10": {
+      "availability": "11:00 AM - 6:00 PM",
+      "chamber": "Chamber 10",
+      "fees": 300,
+      "name": "Dr. Jack Davis",
+      "specialization": "Dentist"
+    }
+  },
+  "users": {
+    "1234567890": {
+      "email": "user@example.com",
+      "name": "Test User",
+      "password": "password123"
+    },
+    "9876543210": {
+      "email": "anotheruser@example.com",
+      "name": "Another User",
+      "password": "password456"
+    }
+  }
+}

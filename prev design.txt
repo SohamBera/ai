@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Recommendation System</title>
+    <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-database.js"></script>
+</head>
+<body>
+    <h1>Doctor Recommendation System</h1>
+
+    <!-- Login Form -->
+    <div id="login-section">
+        <h2>Login</h2>
+        <input type="text" id="mobile" placeholder="Mobile Number" />
+        <input type="password" id="password" placeholder="Password" />
+        <button onclick="login()">Login</button>
+        <button onclick="signup()">Sign Up</button>
+    </div>
+
+    <!-- Symptom Input -->
+    <div id="recommendation-section" style="display:none;">
+        <h2>Enter Your Symptoms</h2>
+        <textarea id="symptoms" placeholder="Describe your symptoms here"></textarea>
+        <button onclick="getRecommendations()">Get Recommendations</button>
+        <div id="recommendations"></div>
+        <button onclick="logout()">Logout</button>
+
+        <!-- Button to View My Appointments -->
+        <button onclick="viewAppointments()">My Appointments</button>
+    </div>
+
+    <!-- View Booked Appointments -->
+    <div id="appointments-section" style="display:none;">
+        <h2>Your Booked Appointments</h2>
+        <ul id="appointment-list">
+            <!-- Booked appointments will be displayed here -->
+        </ul>
+
+        <!-- Back Button to Return to Recommendation Page -->
+        <button onclick="backToRecommendations()">Back to Recommendations</button>
+    </div>
+
+    <script>
+        let userMobile = ""; // Store the user's mobile number
+
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            databaseURL: "YOUR_DATABASE_URL",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // Login Function
+        function login() {
+            const mobile = document.getElementById("mobile").value;
+            const password = document.getElementById("password").value;
+
+            fetch("http://127.0.0.1:5000/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ mobile, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                if (data.message === "Login successful!") {
+                    userMobile = mobile; // Store mobile for later use
+                    document.getElementById("login-section").style.display = "none";
+                    document.getElementById("recommendation-section").style.display = "block";
+                    fetchBookedDoctors(); // Fetch any booked doctors after login
+                }
+            })
+            .catch(error => console.error("Error logging in:", error));
+        }
+
+        // Signup Function
+        function signup() {
+            const mobile = document.getElementById("mobile").value;
+            const password = document.getElementById("password").value;
+
+            fetch("http://127.0.0.1:5000/signup", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ mobile, password, name: "New User" })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+            })
+            .catch(error => console.error("Error signing up:", error));
+        }
+
+        // Logout Function
+        function logout() {
+            document.getElementById("login-section").style.display = "block";
+            document.getElementById("recommendation-section").style.display = "none";
+            document.getElementById("appointments-section").style.display = "none";
+        }
+
+        // Get Doctor Recommendations
+        function getRecommendations() {
+            const symptoms = document.getElementById("symptoms").value;
+
+            fetch("http://127.0.0.1:5000/recommend", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ symptoms })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const recommendationsDiv = document.getElementById("recommendations");
+                recommendationsDiv.innerHTML = "<h3>Recommended Doctors:</h3>";
+                data.forEach(doctor => {
+                    recommendationsDiv.innerHTML += `
+                    <div style="border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
+                        <p><strong>${doctor.name}</strong><br>
+                        Specialization: ${doctor.specialization}<br>
+                        Chamber: ${doctor.chamber}<br>
+                        Fees: ${doctor.fees}<br>
+                        Availability: ${doctor.availability}</p>
+
+                        <!-- Book Appointment Button -->
+                        <button onclick="bookAppointment('${doctor.name}')">Book Appointment</button>
+                        <p id="booking-count-${doctor.name}">Bookings: Loading...</p>
+                    </div>
+                    `;
+                    fetchBookingCount(doctor.name); // Fetch the booking count for each doctor
+                });
+            })
+            .catch(error => console.error("Error fetching recommendations:", error));
+        }
+
+        // Fetch Booking Count for each doctor
+        // Fetch Booking Count for each doctor
+        function fetchBookingCount(doctorName) {
+    const encodedDoctorName = encodeURIComponent(doctorName);  // Encode the doctor's name for the URL
+    fetch(`http://127.0.0.1:5000/bookings_count?doctor_name=${encodedDoctorName}`)
+    .then(response => response.json())
+    .then(data => {
+        if (data && data.count !== undefined) {
+            document.getElementById(`booking-count-${doctorName}`).innerText = `Bookings: ${data.count}`;
+        } else {
+            document.getElementById(`booking-count-${doctorName}`).innerText = "Bookings: Error fetching count.";
+        }
+    })
+    .catch(error => {
+        console.error("Error fetching booking count:", error);
+        document.getElementById(`booking-count-${doctorName}`).innerText = "Bookings: Error fetching count.";
+    });
+}
+
+
+
+        // Book Appointment (No time slot)
+        function bookAppointment(doctorName) {
+            fetch("http://127.0.0.1:5000/book", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    doctor_name: doctorName,
+                    user_mobile: userMobile
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                if (data.message === 'Appointment booked successfully!') {
+                    fetchBookedDoctors(); // Update the booked doctors list
+                }
+            })
+            .catch(error => console.error("Error booking appointment:", error));
+        }
+
+        // Fetch Booked Doctors for Today
+        function fetchBookedDoctors() {
+            fetch(`http://127.0.0.1:5000/my_appointments?user_mobile=${userMobile}`)
+            .then(response => response.json())
+            .then(data => {
+                const appointmentList = document.getElementById("appointment-list");
+                appointmentList.innerHTML = ""; // Clear existing list
+
+                if (Object.keys(data).length > 0) {
+                    const appointments = Object.values(data);
+                    appointments.forEach(appointment => {
+                        const listItem = document.createElement("li");
+                        listItem.textContent = `Doctor: ${appointment.doctor_name}, Date: ${appointment.date}`;
+                        appointmentList.appendChild(listItem);
+                    });
+                } else {
+                    appointmentList.innerHTML = "<li>No appointments booked for today.</li>";
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching appointments:", error);
+                // Optionally show a fallback message in case of error
+                document.getElementById("appointments-section").style.display = "none";
+            });
+        }
+
+        // View My Appointments Button
+        function viewAppointments() {
+            document.getElementById("appointments-section").style.display = "block";
+            document.getElementById("recommendation-section").style.display = "none";
+            fetchBookedDoctors(); // Fetch the appointments when button is clicked
+        }
+
+        // Back to Recommendation Section
+        function backToRecommendations() {
+            document.getElementById("appointments-section").style.display = "none";
+            document.getElementById("recommendation-section").style.display = "block";
+        }
+    </script>
+</body>
+</html>
